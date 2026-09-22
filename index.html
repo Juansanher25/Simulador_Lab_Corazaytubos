@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08111f">
+  <title>HT33 Lab Studio · Transferencia de Calor II</title>
+  <style>
+    :root{
+      --ink:#142033; --muted:#66738a; --paper:#f5f7fb; --card:#ffffff;
+      --line:#dce3ee; --navy:#08111f; --navy-2:#10223c;
+      --blue:#2166f3; --blue-soft:#eaf0ff; --cyan:#0fa8b6;
+      --red:#e35b4f; --red-soft:#fff0ee; --amber:#bd7a18; --amber-soft:#fff6df;
+      --green:#167c5a; --green-soft:#eaf8f2; --purple:#7856d6;
+      --shadow:0 14px 40px rgba(26,47,81,.08); --radius:20px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.45}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    a{color:inherit}
+    .topbar{background:var(--navy);color:#fff;padding:16px 28px;display:flex;justify-content:space-between;gap:16px;align-items:center;position:sticky;top:0;z-index:10;box-shadow:0 3px 18px rgba(0,0,0,.18)}
+    .brand{display:flex;align-items:center;gap:11px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:750}
+    .brand-mark{width:28px;height:28px;border-radius:9px;background:linear-gradient(135deg,#ff806d,#ffb36a 55%,#4f88ff);display:grid;place-items:center;box-shadow:0 4px 14px rgba(255,128,109,.25)}
+    .brand-mark:before{content:"";width:12px;height:12px;border:2px solid #fff;border-left-color:transparent;border-radius:50%;transform:rotate(-35deg)}
+    .top-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+    .btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:11px;padding:9px 13px;font-weight:650;font-size:13px;transition:.18s ease;white-space:nowrap}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 5px 13px rgba(35,57,94,.12)}
+    .btn.dark{background:#172a47;border-color:#2e4568;color:#fff}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.soft{background:var(--blue-soft);border-color:#cfdbff;color:#1550c9}
+    .btn.danger{background:#fff5f3;border-color:#ffd1c9;color:#b5483e}
+    .btn.small{padding:7px 10px;font-size:12px;border-radius:9px}
+    .wrap{max-width:1440px;margin:auto;padding:28px 28px 60px}
+    .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:22px;align-items:stretch;margin:4px 0 22px}
+    .hero-copy{background:var(--navy);color:#fff;border-radius:26px;padding:38px 42px;position:relative;overflow:hidden;box-shadow:var(--shadow);min-height:300px}
+    .hero-copy:after{content:"";position:absolute;width:360px;height:360px;border:1px solid rgba(255,255,255,.12);border-radius:50%;right:-170px;bottom:-185px;box-shadow:0 0 0 24px rgba(255,255,255,.035),0 0 0 49px rgba(255,255,255,.025)}
+    .eyebrow{color:#9bb8f9;font-size:12px;font-weight:750;letter-spacing:.11em;text-transform:uppercase;margin-bottom:16px}
+    h1{font-size:clamp(31px,4vw,56px);line-height:1.02;letter-spacing:-.045em;margin:0 0 17px;max-width:650px}
+    .hero-copy p{color:#c3d0e4;max-width:600px;font-size:16px;margin:0 0 25px}
+    .hero-actions{display:flex;gap:10px;flex-wrap:wrap;position:relative;z-index:1}
+    .hero-actions .btn{border-color:transparent}
+    .hero-actions .btn:first-child{background:#fff;color:var(--navy)}
+    .hero-actions .btn:last-child{background:#1c365a;color:#fff;border-color:#2c4d79}
+    .hero-note{font-size:12px;color:#98aac4;margin-top:22px;position:relative;z-index:1}
+    .diagram-card{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:24px;box-shadow:var(--shadow);display:flex;flex-direction:column;justify-content:space-between;min-height:300px}
+    .section-kicker{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:780;margin-bottom:5px}
+    h2{font-size:25px;letter-spacing:-.03em;margin:0 0 8px}
+    h3{font-size:17px;letter-spacing:-.015em;margin:0 0 8px}
+    h4{font-size:14px;margin:0 0 4px}
+    .muted{color:var(--muted)}
+    .tiny{font-size:11px;color:var(--muted)}
+    .diagram{width:100%;height:190px;display:block;margin-top:2px}
+    .diagram-legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:4px}
+    .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}.dot.hot{background:var(--red)}.dot.cold{background:var(--blue)}
+    .anchorbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 25px}
+    .anchorbar a{text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 13px;font-size:12px;font-weight:700;color:#53637a}
+    .anchorbar a:hover{border-color:#afc2e9;color:var(--blue);background:#fbfcff}
+    .section{margin-top:30px;scroll-margin-top:80px}
+    .section-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin-bottom:14px}
+    .section-head p{margin:0;max-width:750px;color:var(--muted);font-size:14px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .pad{padding:22px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    .step-card{padding:18px;border:1px solid var(--line);background:#fff;border-radius:16px;min-height:150px}
+    .step-no{display:inline-grid;place-items:center;width:29px;height:29px;background:var(--navy);color:#fff;border-radius:9px;font-weight:800;font-size:13px;margin-bottom:13px}
+    .step-card p{margin:6px 0 0;color:var(--muted);font-size:13px}
+    .checklist{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+    .check{display:flex;align-items:flex-start;gap:9px;color:#40516b;font-size:13px}
+    .check input{accent-color:var(--blue);margin-top:3px}
+    .callout{padding:13px 15px;border-radius:13px;border:1px solid #d7e2fc;background:#f5f8ff;color:#35517f;font-size:13px}
+    .callout.warn{background:var(--amber-soft);border-color:#f3ddb0;color:#7d5b1a}
+    .callout.safe{background:var(--green-soft);border-color:#bfe8d7;color:#22634e}
+    .callout strong{color:inherit}
+    .toolbar-card{padding:18px 20px;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .mode-tabs{display:flex;gap:4px;background:#edf1f7;padding:4px;border-radius:13px}
+    .mode-tab{border:0;background:transparent;color:#617089;padding:10px 14px;border-radius:10px;font-weight:750;font-size:13px}
+    .mode-tab.active{background:#fff;color:var(--blue);box-shadow:0 2px 8px rgba(30,54,90,.12)}
+    .mode-description{font-size:12px;color:var(--muted);margin-top:4px}
+    .control-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:end}
+    .control-grid.compact{grid-template-columns:repeat(4,1fr)}
+    .field{display:flex;flex-direction:column;gap:5px}
+    .field label{font-size:11px;font-weight:780;letter-spacing:.04em;color:#5b6b82;text-transform:uppercase}
+    .field input,.field select,.field textarea{width:100%;border:1px solid #ccd6e5;background:#fbfcfe;border-radius:10px;padding:10px 10px;color:var(--ink);outline:none}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:#86a8f6;box-shadow:0 0 0 3px rgba(33,102,243,.1)}
+    .field .unit{position:relative}.field .unit input{padding-right:44px}.field .unit span{position:absolute;right:10px;bottom:10px;color:#8390a5;font-size:12px}
+    .help{font-size:11px;color:var(--muted);margin-top:2px}
+    .subcard{border:1px solid var(--line);border-radius:16px;padding:17px;background:#fff}
+    .subcard-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+    .geometry{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .geometry .mini{background:#f8fafc;border:1px solid #e5eaf2;border-radius:12px;padding:11px}.mini b{display:block;font-size:16px}.mini span{font-size:11px;color:var(--muted)}
+    .notice-bar{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#f9fbff;border:1px solid #dce7fc;border-radius:12px;color:#466187;font-size:12px;margin-bottom:14px}
+    .status-pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800;white-space:nowrap}
+    .status-pill:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}.status-ok{color:var(--green);background:var(--green-soft)}.status-warn{color:var(--amber);background:var(--amber-soft)}.status-bad{color:#b5483e;background:var(--red-soft)}.status-neutral{color:#66738a;background:#eef2f7}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}
+    table{width:100%;border-collapse:collapse;min-width:1140px;font-size:12px}
+    th{background:#f4f7fb;color:#63728a;text-align:left;text-transform:uppercase;letter-spacing:.045em;font-size:10px;padding:10px 9px;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;z-index:1}
+    td{padding:8px 9px;border-bottom:1px solid #edf0f5;vertical-align:middle;white-space:nowrap}
+    tr:last-child td{border-bottom:0}
+    tbody tr:hover{background:#fbfcff}
+    td.num{text-align:right;font-variant-numeric:tabular-nums}.calc{color:#243958;font-variant-numeric:tabular-nums}.calc.muted-calc{color:#9aa6b7}
+    .cell-input{width:74px;border:1px solid #d5ddea;background:#fff;border-radius:7px;padding:6px 5px;color:var(--ink);font-size:12px;text-align:right}.cell-input:focus{outline:2px solid #b8cbfb;border-color:#6f99f3}
+    .select-input{border:1px solid #d5ddea;background:#fff;border-radius:7px;padding:6px 5px;color:var(--ink);font-size:11px}
+    .row-label{font-weight:780;color:#243958}.row-label small{display:block;color:#8b98aa;font-weight:500;font-size:10px;margin-top:2px}
+    .table-tools{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    .filter-group{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.filter-group label{font-size:11px;color:var(--muted);font-weight:700}.filter-group select{border:1px solid var(--line);border-radius:9px;padding:7px;background:#fff;font-size:12px}
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+    .kpi{padding:16px 17px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 22px rgba(28,52,89,.05)}
+    .kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:800;color:#77859a}.kpi-value{font-size:27px;font-weight:820;letter-spacing:-.04em;margin-top:5px}.kpi-sub{font-size:11px;color:var(--muted);margin-top:3px}
+    .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.chart-card{padding:18px}.chart-card.wide{grid-column:1/-1}
+    canvas{width:100%;height:250px;display:block}.chart-title{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:8px}.chart-title h3{margin:0}.chart-legend{display:flex;gap:13px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:4px}.legend-item{display:inline-flex;gap:5px;align-items:center}.legend-line{display:inline-block;width:17px;height:3px;border-radius:4px}
+    .analysis-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.analysis-card{padding:17px;border:1px solid var(--line);border-radius:16px;background:#fff}.analysis-card p{font-size:13px;color:#53637a;margin:7px 0 0}.analysis-card strong{color:var(--ink)}
+    .conclusion{display:grid;grid-template-columns:1fr 1fr;gap:14px}.conclusion textarea{min-height:175px;resize:vertical;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fbfcfe;color:var(--ink)}
+    .equations{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.eq{border:1px solid #e3e8f1;background:#fbfcfe;border-radius:12px;padding:11px 13px;font-size:13px}.eq code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#203e75;font-size:12px}.eq .eq-note{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+    details{border:1px solid var(--line);border-radius:13px;background:#fff}details+details{margin-top:9px}summary{cursor:pointer;padding:13px 15px;font-weight:750;font-size:13px}details .details-body{padding:0 15px 15px;color:#53637a;font-size:13px}
+    .footer{padding-top:35px;color:#8591a4;text-align:center;font-size:11px}
+    .hidden{display:none!important}
+    @media(max-width:1100px){.hero{grid-template-columns:1fr}.control-grid{grid-template-columns:repeat(3,1fr)}.kpi-grid{grid-template-columns:repeat(2,1fr)}.analysis-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:720px){.topbar{padding:13px 16px;align-items:flex-start;flex-direction:column}.top-actions{justify-content:flex-start}.wrap{padding:18px 14px 40px}.hero-copy{padding:28px 23px}.diagram-card{padding:18px}.grid-3,.grid-2,.chart-grid,.conclusion{grid-template-columns:1fr}.chart-card.wide{grid-column:auto}.control-grid,.control-grid.compact{grid-template-columns:1fr 1fr}.geometry{grid-template-columns:repeat(2,1fr)}.analysis-grid{grid-template-columns:1fr}.kpi-grid{grid-template-columns:1fr 1fr}.section-head{display:block}.section-head p{margin-top:6px}.toolbar-card{align-items:flex-start}.mode-tabs{width:100%}.mode-tab{flex:1}.equations{grid-template-columns:1fr}}
+    @media(max-width:430px){.control-grid,.control-grid.compact{grid-template-columns:1fr}.kpi-grid{grid-template-columns:1fr}.hero-actions .btn{width:100%}}
+    @media print{body{background:#fff}.topbar{position:static;box-shadow:none}.top-actions,.anchorbar,.hero-actions,.btn,.mode-tabs,.table-tools button,.notice-bar,.checklist,.footer{display:none!important}.wrap{max-width:none;padding:0}.hero-copy{color:#111;background:#fff;border:1px solid #bbb;box-shadow:none}.hero-copy p,.hero-note{color:#444}.diagram-card,.card,.kpi,.chart-card,.analysis-card,.step-card{box-shadow:none}.section{break-inside:avoid}.table-wrap{overflow:visible}table{min-width:0;font-size:9px}.cell-input{border:0;padding:0}.chart-grid{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"></span> Universidad de América · Transferencia de Calor II</div>
+    <div class="top-actions">
+      <button class="btn dark small" id="btnSave">Guardar sesión</button>
+      <button class="btn dark small" id="btnLoad">Cargar sesión</button>
+      <button class="btn dark small" id="btnCSV">Exportar CSV</button>
+      <button class="btn dark small" id="btnPrint">Imprimir / PDF</button>
+      <input type="file" id="fileImport" accept=".csv,text/csv" class="hidden">
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="hero">
+      <section class="hero-copy">
+        <div class="eyebrow">HT33 Lab Studio · archivo autocontenido</div>
+        <h1>Del caudal a la decisión térmica.</h1>
+        <p>Un cuaderno interactivo para predecir, registrar y explicar qué ocurre con el intercambiador de coraza y tubos cuando cambia el caudal de los fluidos.</p>
+        <div class="hero-actions">
+          <a class="btn" href="#simulador">Empezar la práctica</a>
+          <a class="btn" href="#ecuaciones">Ver ecuaciones</a>
+        </div>
+        <div class="hero-note">Funciona sin internet: todos los cálculos, gráficos y exportaciones viven en este único HTML.</div>
+      </section>
+      <section class="diagram-card" aria-label="Esquema del intercambiador">
+        <div>
+          <div class="section-kicker">Mapa rápido del equipo</div>
+          <h2>HT33 · siete tubos, una coraza</h2>
+          <div class="muted" style="font-size:13px">El agua caliente circula por los tubos y el agua fría por la coraza con deflectores.</div>
+        </div>
+        <svg class="diagram" viewBox="0 0 640 205" role="img" aria-label="Diagrama esquemático de un intercambiador de coraza y tubos">
+          <defs>
+            <linearGradient id="shell" x1="0" x2="1"><stop offset="0" stop-color="#e9eef6"/><stop offset=".5" stop-color="#f9fbfd"/><stop offset="1" stop-color="#dce5f1"/></linearGradient>
+            <marker id="arrowHot" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7z" fill="#e35b4f"/></marker>
+            <marker id="arrowCold" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7z" fill="#2166f3"/></marker>
+          </defs>
+          <rect x="92" y="40" width="456" height="119" rx="25" fill="url(#shell)" stroke="#b8c6da" stroke-width="2"/>
+          <path d="M76 64h30v70H76c-11 0-19-9-19-19V83c0-11 8-19 19-19Z" fill="#d4deed" stroke="#aebdd1"/>
+          <path d="M534 64h30c11 0 19 8 19 19v32c0 11-8 19-19 19h-30Z" fill="#d4deed" stroke="#aebdd1"/>
+          <path d="M115 67 C190 67 198 132 270 132 S350 67 430 67 S490 132 525 132" fill="none" stroke="#e35b4f" stroke-width="9" stroke-linecap="round" marker-end="url(#arrowHot)"/>
+          <path d="M525 109 C471 109 446 58 389 58 S296 109 235 109 S167 58 115 58" fill="none" stroke="#2166f3" stroke-width="7" stroke-linecap="round" marker-end="url(#arrowCold)" opacity=".9"/>
+          <path d="M228 48v108M375 48v108" stroke="#9eabc0" stroke-width="4" opacity=".85"/>
+          <circle cx="116" cy="67" r="5" fill="#fff" stroke="#e35b4f" stroke-width="3"/><circle cx="525" cy="132" r="5" fill="#fff" stroke="#e35b4f" stroke-width="3"/>
+          <circle cx="115" cy="58" r="5" fill="#fff" stroke="#2166f3" stroke-width="3"/><circle cx="525" cy="109" r="5" fill="#fff" stroke="#2166f3" stroke-width="3"/>
+          <text x="60" y="32" font-size="13" fill="#b5483e" font-weight="700">T1 · entrada caliente</text><text x="472" y="180" font-size="13" fill="#b5483e" font-weight="700">T2 · salida</text>
+          <text x="67" y="185" font-size="13" fill="#1550c9" font-weight="700">T3 · entrada fría</text><text x="471" y="30" font-size="13" fill="#1550c9" font-weight="700">T4 · salida</text>
+        </svg>
+        <div class="diagram-legend"><span><i class="dot hot"></i>fluido caliente / tubos</span><span><i class="dot cold"></i>fluido frío / coraza</span><span>⇄ cambia la configuración</span></div>
+      </section>
+    </div>
+
+    <nav class="anchorbar" aria-label="Secciones de la aplicación">
+      <a href="#guia">01 · Preparación</a><a href="#simulador">02 · Simular / capturar</a><a href="#resultados">03 · Resultados</a><a href="#analisis">04 · Argumentar</a><a href="#ecuaciones">05 · Ecuaciones</a>
+    </nav>
+
+    <section class="section" id="guia">
+      <div class="section-head"><div><div class="section-kicker">01 · Antes de abrir el agua</div><h2>Una guía de laboratorio en contexto</h2></div><p>La aplicación acompaña el procedimiento, pero no reemplaza la supervisión del docente ni el manual del equipo.</p></div>
+      <div class="grid-3">
+        <article class="step-card"><span class="step-no">1</span><h3>Predice</h3><p>Antes de medir, elige una combinación de caudales y registra qué esperas que ocurra con <b>U</b>, las eficiencias y las temperaturas de salida.</p></article>
+        <article class="step-card"><span class="step-no">2</span><h3>Mide con estabilidad</h3><p>Espera a que T1, T2, T3, T4, Fhot y Fcold se estabilicen. Copia únicamente lecturas del software del equipo o del instrumento autorizado.</p></article>
+        <article class="step-card"><span class="step-no">3</span><h3>Explica con evidencia</h3><p>Compara C1 (1/1), C2 (2/1) y C3 (1/2) L/min. Separa el efecto del caudal caliente, el frío y el arreglo de flujo.</p></article>
+      </div>
+      <div class="card pad" style="margin-top:14px">
+        <div class="subcard-head"><div><h3>Lista de seguridad y preparación</h3><div class="tiny">La lista queda guardada en el navegador al pulsar “Guardar sesión”.</div></div><span class="status-pill status-neutral">control previo</span></div>
+        <div class="grid-2">
+          <div class="checklist">
+            <label class="check"><input type="checkbox" data-check="supervision"> Práctica autorizada y supervisada; conexiones verificadas.</label>
+            <label class="check"><input type="checkbox" data-check="electric"> No retirar paneles; alimentación eléctrica y RCD revisados por personal autorizado.</label>
+            <label class="check"><input type="checkbox" data-check="hot"> Identificados superficies y líquidos calientes; usar el EPP indicado.</label>
+          </div>
+          <div class="checklist">
+            <label class="check"><input type="checkbox" data-check="water"> Circuitos cebados, sin burbujas, y agua limpia; no dejar agua estancada.</label>
+            <label class="check"><input type="checkbox" data-check="stability"> Temperaturas y caudales estables antes de registrar cada punto.</label>
+            <label class="check"><input type="checkbox" data-check="drain"> Al terminar: apagar según el procedimiento, drenar y limpiar el equipo.</label>
+          </div>
+        </div>
+        <div class="callout warn" style="margin-top:15px"><strong>Importante:</strong> este archivo es una herramienta académica para preparar y analizar la práctica. El simulador no acciona bombas, válvulas ni resistencias del HT30X/HT30XC.</div>
+      </div>
+    </section>
+
+    <section class="section" id="simulador">
+      <div class="section-head"><div><div class="section-kicker">02 · Laboratorio interactivo</div><h2>Simulador y hoja de captura</h2></div><p>Genera una referencia didáctica o cambia a captura de laboratorio. Los campos se pueden editar directamente.</p></div>
+      <div class="card toolbar-card">
+        <div><div class="section-kicker" style="margin:0">Modo de trabajo</div><div class="mode-description" id="modeDescription">Modelo académico idealizado para anticipar tendencias; no son datos medidos.</div></div>
+        <div class="mode-tabs" role="tablist"><button class="mode-tab active" data-mode="sim" role="tab">Simulador didáctico</button><button class="mode-tab" data-mode="lab" role="tab">Datos de laboratorio</button></div>
+      </div>
+
+      <div class="grid-2" style="margin-top:14px">
+        <div class="card pad" id="simControls">
+          <div class="subcard-head"><div><h3>Condiciones de referencia</h3><div class="tiny">Inspiradas en el ejercicio E del manual HT33.</div></div><span class="status-pill status-ok">editable</span></div>
+          <div class="control-grid">
+            <div class="field"><label for="simHotIn">T caliente, entrada</label><div class="unit"><input id="simHotIn" type="number" step="0.1" value="60"><span>°C</span></div></div>
+            <div class="field"><label for="simColdIn">T fría, entrada</label><div class="unit"><input id="simColdIn" type="number" step="0.1" value="20"><span>°C</span></div></div>
+            <div class="field"><label for="simU">U de referencia</label><div class="unit"><input id="simU" type="number" step="10" value="900"><span>W/m²K</span></div></div>
+            <div class="field"><label for="simExp">Sensibilidad al caudal</label><div class="unit"><input id="simExp" type="number" step="0.01" value="0.25" min="0" max="1"><span>n</span></div></div>
+            <div class="field"><label for="simArrangement">Arreglo generado</label><select id="simArrangement"><option value="both">Ambos</option><option value="counter">Contraflujo</option><option value="parallel">Paralelo</option></select></div>
+          </div>
+          <div class="help" style="margin-top:10px">El modelo usa ε–NTU con agua y hace crecer U con el caudal: <code>U = Uref · (qₕ·q𝚌)<sup>n/2</sup></code>. Modifica n para discutir la sensibilidad, no para “forzar” una conclusión.</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:15px"><button class="btn primary" id="btnGenerate">Generar escenarios del manual</button><button class="btn soft" id="btnPrepare">Preparar captura vacía</button></div>
+        </div>
+        <div class="card pad">
+          <div class="subcard-head"><div><h3>Geometría usada</h3><div class="tiny">Valores técnicos del HT33 indicados en el manual.</div></div><span class="status-pill status-neutral">modelo</span></div>
+          <div class="geometry">
+            <div class="mini"><b>7</b><span>tubos en paralelo</span></div><div class="mini"><b>5.15 mm</b><span>diámetro interno</span></div><div class="mini"><b>6.35 mm</b><span>diámetro externo</span></div><div class="mini"><b>1.008 m</b><span>longitud de transferencia</span></div>
+          </div>
+          <div class="callout" style="margin-top:14px"><b>Área calculada A = <span id="areaValue">0.0182</span> m².</b> Se emplea el diámetro medio aritmético: <code>A = π · dₘ · L</code>.</div>
+          <div class="tiny" style="margin-top:11px">En datos reales, conserva los valores de T y F del software Armfield. La interpolación de propiedades del agua es orientativa; el estudiante puede contrastarla con las tablas del manual.</div>
+        </div>
+      </div>
+
+      <div class="card pad" style="margin-top:14px">
+        <div class="notice-bar"><span class="status-pill status-neutral">tabla de trabajo</span><span><b>Seis filas</b> permiten trabajar las tres combinaciones definidas para la práctica en contraflujo y paralelo. Para una práctica más corta, filtra una configuración.</span></div>
+        <div class="table-tools">
+          <div class="filter-group"><label for="layoutFilter">Mostrar:</label><select id="layoutFilter"><option value="all">Todas las configuraciones</option><option value="counter">Contraflujo</option><option value="parallel">Paralelo</option></select><label for="uBasis" style="margin-left:8px">Q para U:</label><select id="uBasis"><option value="Qe">Qe · emitido por caliente</option><option value="Qa">Qa · absorbido por frío</option><option value="avg">Promedio Qe/Qa</option></select></div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn small" id="btnAddRow">+ Añadir punto</button><button class="btn small" id="btnImport">Importar CSV</button><button class="btn small" id="btnClearTemps">Borrar temperaturas</button></div>
+        </div>
+        <div class="table-wrap"><table id="dataTable"><thead><tr>
+          <th># / caso</th><th>arreglo</th><th>Fhot<br>L/min</th><th>Fcold<br>L/min</th><th>T1 entrada h<br>°C</th><th>T2 salida h<br>°C</th><th>T3 entrada c<br>°C</th><th>T4 salida c<br>°C</th><th>estado</th><th>Qe<br>kW</th><th>Qa<br>kW</th><th>LMTD<br>°C</th><th>U<br>W/m²K</th><th>ηm<br>%</th><th></th>
+        </tr></thead><tbody></tbody></table></div>
+        <div class="tiny" style="margin-top:10px">Convención: qh y qc son caudales volumétricos; T1/T2 corresponden a entrada/salida caliente y T3/T4 a entrada/salida fría. En paralelo, la LMTD usa las diferencias de temperatura de los dos extremos del mismo lado.</div>
+      </div>
+    </section>
+
+    <section class="section" id="resultados">
+      <div class="section-head"><div><div class="section-kicker">03 · Lectura de resultados</div><h2>¿Qué cambió cuando cambió el caudal?</h2></div><p>Los indicadores se recalculan en cada edición. En modo de laboratorio, usa la diferencia entre Qe y Qa para discutir pérdidas o ganancias de calor.</p></div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">registros válidos</div><div class="kpi-value" id="kpiValid">0 / 0</div><div class="kpi-sub">con LMTD físicamente calculable</div></div>
+        <div class="kpi"><div class="kpi-label">U promedio</div><div class="kpi-value" id="kpiU">—</div><div class="kpi-sub">W/m²K · base seleccionada</div></div>
+        <div class="kpi"><div class="kpi-label">η térmica media</div><div class="kpi-value" id="kpiEta">—</div><div class="kpi-sub">promedio de ηh y ηc</div></div>
+        <div class="kpi"><div class="kpi-label">cierre energético</div><div class="kpi-value" id="kpiBalance">—</div><div class="kpi-sub">100% significa Qe ≈ Qa</div></div>
+      </div>
+      <div class="chart-grid">
+        <article class="card chart-card"><div class="chart-title"><h3>U por combinación de caudal</h3><span class="tiny">W/m²K</span></div><canvas id="chartU" height="250"></canvas><div class="chart-legend" id="legendU"></div></article>
+        <article class="card chart-card"><div class="chart-title"><h3>Eficiencia térmica media</h3><span class="tiny">ηm (%)</span></div><canvas id="chartEta" height="250"></canvas><div class="chart-legend" id="legendEta"></div></article>
+        <article class="card chart-card wide"><div class="chart-title"><h3>Perfil térmico del punto seleccionado</h3><select id="profileRow" class="select-input"></select></div><canvas id="chartProfile" height="250"></canvas><div class="tiny">T1 y T2 muestran el enfriamiento del fluido caliente; T3 y T4, el calentamiento del fluido frío.</div></article>
+      </div>
+    </section>
+
+    <section class="section" id="analisis">
+      <div class="section-head"><div><div class="section-kicker">04 · Argumentación</div><h2>Comparaciones que sí responden la pregunta</h2></div><p>La conclusión no debe ser “subió el caudal y subió U”: relaciona caudal, capacidad calorífica, LMTD, balance de energía y arreglo de flujo.</p></div>
+      <div class="analysis-grid" id="analysisCards"></div>
+      <div class="card pad" style="margin-top:14px">
+        <div class="subcard-head"><div><h3>Borrador de análisis y conclusiones</h3><div class="tiny">Úsalo como punto de partida; valida cada afirmación con tus mediciones y porcentajes.</div></div><button class="btn soft small" id="btnDraft">Generar borrador</button></div>
+        <div class="conclusion"><div class="field"><label for="analysisText">Análisis de resultados</label><textarea id="analysisText" placeholder="Describe tendencias, anomalías y posibles fuentes de diferencia entre Qe y Qa."></textarea></div><div class="field"><label for="conclusionText">Conclusiones (máximo 3, soportadas con datos)</label><textarea id="conclusionText" placeholder="1. ...\n2. ...\n3. ..."></textarea></div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn primary small" id="btnCopy">Copiar resumen al portapapeles</button><span class="tiny" id="copyStatus" style="align-self:center"></span></div>
+      </div>
+    </section>
+
+    <section class="section" id="ecuaciones">
+      <div class="section-head"><div><div class="section-kicker">05 · Caja de herramientas</div><h2>Ecuaciones visibles, no una caja negra</h2></div><p>Las expresiones siguen las magnitudes solicitadas en el formato de laboratorio y en los ejercicios B, D y E del manual HT33.</p></div>
+      <div class="card pad">
+        <div class="equations">
+          <div class="eq"><code>qᵥ [m³/s] = F [L/min] · 1.667×10⁻⁵</code><span class="eq-note">Conversión de caudal volumétrico.</span></div>
+          <div class="eq"><code>ṁ = qᵥ · ρ</code><span class="eq-note">Flujo másico, con ρ en kg/m³.</span></div>
+          <div class="eq"><code>Qe = ṁh · Cph · (T1 − T2)</code><span class="eq-note">Potencia emitida por el fluido caliente.</span></div>
+          <div class="eq"><code>Qa = ṁc · Cpc · (T4 − T3)</code><span class="eq-note">Potencia absorbida por el fluido frío.</span></div>
+          <div class="eq"><code>ΔTlm = (ΔT₁ − ΔT₂) / ln(ΔT₁/ΔT₂)</code><span class="eq-note">ΔT₁ y ΔT₂ dependen de paralelo o contraflujo.</span></div>
+          <div class="eq"><code>U = Qreal / (A · ΔTlm)</code><span class="eq-note">Selecciona Qe, Qa o el promedio en la tabla.</span></div>
+          <div class="eq"><code>ηh = (T1−T2)/(T1−T3) · 100</code><span class="eq-note">Eficiencia térmica del caliente, según el formato.</span></div>
+          <div class="eq"><code>ηc = (T4−T3)/(T1−T3) · 100</code><span class="eq-note">Eficiencia térmica del frío; ηm = (ηh+ηc)/2.</span></div>
+          <div class="eq"><code>Qmáx = Cmin · (T1 − T3)</code><span class="eq-note">Base para la efectividad ε = Qreal/Qmáx.</span></div>
+          <div class="eq"><code>NTU = U · A / Cmin</code><span class="eq-note">Indicador adicional para conectar U con el método ε–NTU.</span></div>
+        </div>
+        <details style="margin-top:14px"><summary>¿Qué modelo usa el simulador?</summary><div class="details-body">Calcula propiedades aproximadas del agua por interpolación, obtiene C<sub>h</sub> y C<sub>c</sub>, y emplea relaciones ε–NTU idealizadas para flujo paralelo o contraflujo. U aumenta con el caudal mediante un exponente ajustable para representar, de forma cualitativa, el crecimiento de la convección. En el laboratorio real, U se determina a partir de los datos medidos y puede no ser constante.</div></details>
+        <details><summary>¿Por qué Qe y Qa no tienen que coincidir exactamente?</summary><div class="details-body">La igualdad ideal se modifica por pérdidas o ganancias de calor hacia el ambiente, incertidumbre de termopares, caudalímetros, lectura antes de alcanzar estado estacionario y propiedades usadas. Reporta el desbalance: <b>Qf = Qe − Qa</b> y el cierre energético de la práctica.</div></details>
+        <details><summary>¿Cómo usar el archivo con datos reales?</summary><div class="details-body">Pulsa “Datos de laboratorio”, conserva las combinaciones de caudal, reemplaza T1–T4 por las lecturas estables y exporta el CSV. Si el software Armfield permite guardar datos, usa ese archivo como fuente primaria y este HTML como hoja de análisis y discusión.</div></details>
+      </div>
+    </section>
+
+    <div class="footer">HT33 Lab Studio · diseñado como prototipo educativo autocontenido para la práctica de intercambiador de coraza y tubos · versión local</div>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+      const $ = (sel, root=document) => root.querySelector(sel);
+      const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+      const GEOM = {di:0.00515, do:0.00635, L:1.008};
+      const DM = (GEOM.di + GEOM.do) / 2;
+      const AREA = Math.PI * DM * GEOM.L;
+      const CASES = [
+        {id:'1-1', label:'C1 · 1 / 1', qh:1, qc:1},
+        {id:'2-1', label:'C2 · 2 / 1', qh:2, qc:1},
+        {id:'1-2', label:'C3 · 1 / 2', qh:1, qc:2}
+      ];
+      const PROPS = {
+        t:[0,10,20,30,40,50,60,70,80,90,100],
+        rho:[999.84,999.70,998.21,995.65,992.22,988.05,983.20,977.76,971.80,965.30,958.40],
+        cp:[4.2176,4.192,4.181,4.178,4.179,4.181,4.184,4.187,4.195,4.205,4.216]
+      };
+      const state = {
+        mode:'sim', layoutFilter:'all', uBasis:'Qe', selectedRow:0,
+        sim:{hotIn:60,coldIn:20,uRef:900,exp:0.25,arrangement:'both'},
+        rows:[], checks:{}, analysis:'', conclusions:''
+      };
+
+      const uid = () => 'r' + Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-3);
+      const finite = x => x !== null && x !== undefined && x !== '' && Number.isFinite(Number(x));
+      const num = x => finite(x) ? Number(x) : null;
+      const clamp = (x,a,b) => Math.min(b,Math.max(a,x));
+      const fmt = (x,d=2) => Number.isFinite(x) ? x.toLocaleString('es-CO',{minimumFractionDigits:d,maximumFractionDigits:d}) : '—';
+      const compact = (x,d=1) => Number.isFinite(x) ? x.toLocaleString('es-CO',{minimumFractionDigits:d,maximumFractionDigits:d}) : '—';
+      const escapeHTML = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const layoutName = l => l === 'counter' ? 'Contraflujo' : 'Paralelo';
+      const layoutShort = l => l === 'counter' ? 'CC' : 'CO';
+
+      function interp(arr, t){
+        t = clamp(Number(t), PROPS.t[0], PROPS.t[PROPS.t.length-1]);
+        for(let i=0;i<PROPS.t.length-1;i++){
+          if(t <= PROPS.t[i+1]){
+            const f=(t-PROPS.t[i])/(PROPS.t[i+1]-PROPS.t[i]);
+            return arr[i]+f*(arr[i+1]-arr[i]);
+          }
+        }
+        return arr[arr.length-1];
+      }
+      function waterProps(t){ return {rho:interp(PROPS.rho,t),cp:interp(PROPS.cp,t)}; }
+      function massFlow(qLmin,rho){ return Number(qLmin)*rho/60000; }
+      function lmtd(d1,d2){
+        if(!finite(d1)||!finite(d2)||d1<=0||d2<=0) return null;
+        if(Math.abs(d1-d2)<1e-8) return (d1+d2)/2;
+        const ratio=d1/d2;
+        if(ratio<=0 || !Number.isFinite(ratio)) return null;
+        return (d1-d2)/Math.log(ratio);
+      }
+      function epsilonNTU(ntu,cr,layout){
+        if(!finite(ntu)||ntu<0||!finite(cr)) return null;
+        cr=clamp(cr,0,1);
+        if(layout==='parallel') return (1-Math.exp(-ntu*(1+cr)))/(1+cr);
+        if(Math.abs(1-cr)<1e-7) return ntu/(1+ntu);
+        const a=Math.exp(-ntu*(1-cr));
+        return (1-a)/(1-cr*a);
+      }
+      function simulationPoint(qh,qc,layout){
+        const s=state.sim, hotIn=s.hotIn, coldIn=s.coldIn;
+        let t2=hotIn-5, t4=coldIn+5;
+        let Q=0, Ch=1, Cc=1, U=s.uRef;
+        for(let i=0;i<8;i++){
+          const ph=waterProps((hotIn+t2)/2), pc=waterProps((coldIn+t4)/2);
+          Ch=massFlow(qh,ph.rho)*ph.cp*1000;
+          Cc=massFlow(qc,pc.rho)*pc.cp*1000;
+          U=s.uRef*Math.pow(Math.max(qh,0.01),s.exp/2)*Math.pow(Math.max(qc,0.01),s.exp/2)*(layout==='counter'?1:0.90);
+          const cmin=Math.min(Ch,Cc), cmax=Math.max(Ch,Cc), cr=cmin/cmax;
+          const eps=epsilonNTU(U*AREA/cmin,cr,layout);
+          Q=eps*cmin*(hotIn-coldIn);
+          t2=hotIn-Q/Ch; t4=coldIn+Q/Cc;
+        }
+        return {t1:hotIn,t2,t3:coldIn,t4,qh,qc,layout,simU:U};
+      }
+      function makeRow(caseInfo,layout,values){
+        return {id:uid(),caseId:caseInfo.id,label:caseInfo.label,layout,qh:caseInfo.qh,qc:caseInfo.qc,t1:null,t2:null,t3:null,t4:null,...values};
+      }
+      function generateRows(){
+        const rows=[];
+        const layouts=state.sim.arrangement==='both'?['counter','parallel']:[state.sim.arrangement];
+        layouts.forEach(layout => CASES.forEach(c => {
+          const v=simulationPoint(c.qh,c.qc,layout);
+          rows.push(makeRow(c,layout,{t1:v.t1,t2:v.t2,t3:v.t3,t4:v.t4}));
+        }));
+        state.rows=rows; state.selectedRow=0;
+        renderAll();
+      }
+      function blankRows(){
+        const rows=[];
+        const layouts=state.sim.arrangement==='both'?['counter','parallel']:[state.sim.arrangement];
+        layouts.forEach(layout => CASES.forEach(c => rows.push(makeRow(c,layout,{}))));
+        state.rows=rows; state.selectedRow=0; state.mode='lab'; syncModeButtons(); renderAll();
+      }
+      function rowMetrics(row){
+        const values=[row.qh,row.qc,row.t1,row.t2,row.t3,row.t4];
+        if(values.some(v=>!finite(v))) return {valid:false,status:'incomplete',message:'Faltan datos'};
+        const ph=waterProps((row.t1+row.t2)/2), pc=waterProps((row.t3+row.t4)/2);
+        const qvh=row.qh*1.6666666667e-5, qvc=row.qc*1.6666666667e-5;
+        const mh=massFlow(row.qh,ph.rho), mc=massFlow(row.qc,pc.rho);
+        const Ch=mh*ph.cp*1000, Cc=mc*pc.cp*1000;
+        const dTh=row.t1-row.t2, dTc=row.t4-row.t3;
+        const d1=row.layout==='counter' ? row.t1-row.t4 : row.t1-row.t3;
+        const d2=row.layout==='counter' ? row.t2-row.t3 : row.t2-row.t4;
+        const LMTD=lmtd(d1,d2);
+        const Qe=Ch*dTh, Qa=Cc*dTc, Qf=Qe-Qa;
+        const Qreal=state.uBasis==='Qe'?Qe:state.uBasis==='Qa'?Qa:(Qe+Qa)/2;
+        const U=LMTD ? Qreal/(AREA*LMTD) : null;
+        const denom=row.t1-row.t3;
+        const etaH=denom ? dTh/denom*100 : null;
+        const etaC=denom ? dTc/denom*100 : null;
+        const etaM=(finite(etaH)&&finite(etaC)) ? (etaH+etaC)/2 : null;
+        const Cmin=Math.min(Ch,Cc), Cmax=Math.max(Ch,Cc);
+        const Qmax=Cmin*denom;
+        const eff=Qmax ? Qreal/Qmax*100 : null;
+        const NTU=(finite(U)&&Cmin) ? U*AREA/Cmin : null;
+        const cr=Cmax?Cmin/Cmax:null;
+        let status='ok', message='Lectura utilizable';
+        if(!LMTD){status='warning';message='LMTD no definida: revisa extremos térmicos';}
+        else if(row.t1<=row.t3){status='warning';message='T1 debe ser mayor que T3 para este ensayo';}
+        else if(dTh<0 || dTc<0){status='warning';message='Revisa el sentido de calentamiento/enfriamiento';}
+        return {valid:!!LMTD && status==='ok',status,message,ph,pc,qvh,qvc,mh,mc,Ch,Cc,dTh,dTc,d1,d2,LMTD,Qe,Qa,Qf,Qreal,U,etaH,etaC,etaM,Cmin,Cmax,Qmax,eff,NTU,cr};
+      }
+      function statusHTML(m){
+        if(m.status==='ok') return '<span class="status-pill status-ok" title="'+escapeHTML(m.message)+'">OK</span>';
+        if(m.status==='incomplete') return '<span class="status-pill status-neutral" title="'+escapeHTML(m.message)+'">pendiente</span>';
+        return '<span class="status-pill status-warn" title="'+escapeHTML(m.message)+'">revisar</span>';
+      }
+      function inputVal(v){return finite(v)?String(Number(v).toFixed(2)):'';}
+      function renderTable(){
+        const body=$('#dataTable tbody');
+        const visible=state.rows.map((r,i)=>({r,i})).filter(x=>state.layoutFilter==='all'||x.r.layout===state.layoutFilter);
+        body.innerHTML=visible.length?visible.map(({r,i})=>{
+          const m=rowMetrics(r);
+          return `<tr data-row-index="${i}">
+            <td><span class="row-label">${escapeHTML(r.label)} <small>${layoutShort(r.layout)} · ${i+1}</small></span></td>
+            <td><select class="select-input" data-row="${i}" data-field="layout"><option value="counter" ${r.layout==='counter'?'selected':''}>CC</option><option value="parallel" ${r.layout==='parallel'?'selected':''}>CO</option></select></td>
+            <td><input class="cell-input" data-row="${i}" data-field="qh" type="number" min="0" step="0.01" value="${inputVal(r.qh)}"></td>
+            <td><input class="cell-input" data-row="${i}" data-field="qc" type="number" min="0" step="0.01" value="${inputVal(r.qc)}"></td>
+            <td><input class="cell-input" data-row="${i}" data-field="t1" type="number" step="0.1" value="${inputVal(r.t1)}"></td>
+            <td><input class="cell-input" data-row="${i}" data-field="t2" type="number" step="0.1" value="${inputVal(r.t2)}"></td>
+            <td><input class="cell-input" data-row="${i}" data-field="t3" type="number" step="0.1" value="${inputVal(r.t3)}"></td>
+            <td><input class="cell-input" data-row="${i}" data-field="t4" type="number" step="0.1" value="${inputVal(r.t4)}"></td>
+            <td id="status-${i}">${statusHTML(m)}</td>
+            <td class="num calc" id="qeh-${i}">${finite(m.Qe)?fmt(m.Qe/1000):'—'}</td>
+            <td class="num calc" id="qac-${i}">${finite(m.Qa)?fmt(m.Qa/1000):'—'}</td>
+            <td class="num calc" id="lmtd-${i}">${finite(m.LMTD)?fmt(m.LMTD):'—'}</td>
+            <td class="num calc" id="u-${i}">${finite(m.U)?fmt(m.U,0):'—'}</td>
+            <td class="num calc" id="eta-${i}">${finite(m.etaM)?fmt(m.etaM,1):'—'}</td>
+            <td><button class="btn danger small" data-remove="${i}" title="Eliminar fila">×</button></td>
+          </tr>`;
+        }).join(''):'<tr><td colspan="15" style="text-align:center;padding:24px;color:#7b899d">No hay filas con este filtro.</td></tr>';
+        updateProfileSelect();
+      }
+      function updateCalculatedCells(){
+        state.rows.forEach((r,i)=>{
+          const m=rowMetrics(r);
+          const ids=[['status-'+i,statusHTML(m)],['qeh-'+i,finite(m.Qe)?fmt(m.Qe/1000):'—'],['qac-'+i,finite(m.Qa)?fmt(m.Qa/1000):'—'],['lmtd-'+i,finite(m.LMTD)?fmt(m.LMTD):'—'],['u-'+i,finite(m.U)?fmt(m.U,0):'—'],['eta-'+i,finite(m.etaM)?fmt(m.etaM,1):'—']];
+          ids.forEach(([id,html])=>{const el=document.getElementById(id);if(el)el.innerHTML=html;});
+        });
+      }
+      function updateProfileSelect(){
+        const select=$('#profileRow');
+        const vis=state.rows.map((r,i)=>({r,i})).filter(x=>state.layoutFilter==='all'||x.r.layout===state.layoutFilter);
+        if(!vis.some(x=>x.i===state.selectedRow)) state.selectedRow=vis.length?vis[0].i:0;
+        select.innerHTML=vis.map(({r,i})=>`<option value="${i}" ${i===state.selectedRow?'selected':''}>${escapeHTML(r.label)} · ${layoutName(r.layout)}</option>`).join('');
+      }
+      function visibleRows(){return state.rows.map((r,i)=>({r,i,m:rowMetrics(r)})).filter(x=>state.layoutFilter==='all'||x.r.layout===state.layoutFilter);}
+      function updateKPIs(){
+        const rows=visibleRows(), valid=rows.filter(x=>x.m.valid), n=rows.length;
+        $('#kpiValid').textContent=`${valid.length} / ${n}`;
+        const mean=(key)=>valid.length?valid.reduce((a,x)=>a+(Number(x.m[key])||0),0)/valid.length:null;
+        const u=mean('U'), eta=mean('etaM');
+        $('#kpiU').textContent=finite(u)?fmt(u,0):'—'; $('#kpiEta').textContent=finite(eta)?fmt(eta,1)+'%':'—';
+        const balance=valid.length?clamp(100-valid.reduce((a,x)=>a+Math.abs(x.m.Qf)/Math.max(Math.abs(x.m.Qe),Math.abs(x.m.Qa),1)*100,0)/valid.length,0,100):null;
+        $('#kpiBalance').textContent=finite(balance)?fmt(balance,1)+'%':'—';
+      }
+      function colorFor(layout){return layout==='counter'?'#2166f3':'#e35b4f';}
+      function setupCanvas(canvas){
+        const rect=canvas.getBoundingClientRect(), dpr=window.devicePixelRatio||1, w=Math.max(260,rect.width), h=250;
+        canvas.width=w*dpr; canvas.height=h*dpr; const ctx=canvas.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); return {ctx,w,h};
+      }
+      function niceMax(x){ if(!finite(x)||x<=0)return 1; const p=Math.pow(10,Math.floor(Math.log10(x))); return Math.ceil(x/p*1.15)*p; }
+      function drawLineChart(canvas, rows, key, legendEl){
+        const {ctx,w,h}=setupCanvas(canvas); ctx.clearRect(0,0,w,h); const pad={l:45,r:16,t:17,b:42};
+        const groups=[...new Set(rows.filter(x=>x.m.valid).map(x=>x.r.layout))];
+        const labels=[...new Set(rows.map(x=>x.r.label))]; const points=rows.filter(x=>x.m.valid);
+        const values=points.map(x=>x.m[key]).filter(finite); const max=niceMax(Math.max(...values,1));
+        const min=0, pw=w-pad.l-pad.r, ph=h-pad.t-pad.b;
+        const x=(i)=>pad.l+(labels.length<=1?pw/2:i*pw/(labels.length-1)); const y=(v)=>pad.t+ph-(v-min)/(max-min)*ph;
+        ctx.font='11px Inter, system-ui, sans-serif'; ctx.strokeStyle='#e5eaf2';ctx.lineWidth=1;
+        for(let i=0;i<=4;i++){const yy=pad.t+ph*i/4;ctx.beginPath();ctx.moveTo(pad.l,yy);ctx.lineTo(w-pad.r,yy);ctx.stroke();ctx.fillStyle='#8995a8';ctx.fillText(fmt(max*(1-i/4),0),5,yy+4)}
+        ctx.strokeStyle='#aeb9c9';ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+ph);ctx.lineTo(w-pad.r,pad.t+ph);ctx.stroke();
+        labels.forEach((lab,i)=>{ctx.fillStyle='#718097';ctx.textAlign='center';ctx.fillText(lab,x(i),h-17)});ctx.textAlign='left';
+        groups.forEach(layout=>{
+          const color=colorFor(layout);ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=2.5;ctx.beginPath();let started=false;
+          labels.forEach((lab,i)=>{const item=rows.find(z=>z.r.layout===layout&&z.r.label===lab&&z.m.valid);if(!item)return;const xx=x(i), yy=y(item.m[key]);if(!started){ctx.moveTo(xx,yy);started=true}else ctx.lineTo(xx,yy);});ctx.stroke();
+          labels.forEach((lab,i)=>{const item=rows.find(z=>z.r.layout===layout&&z.r.label===lab&&z.m.valid);if(!item)return;const xx=x(i),yy=y(item.m[key]);ctx.beginPath();ctx.arc(xx,yy,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(xx,yy,1.6,0,Math.PI*2);ctx.fill();ctx.fillStyle=color;});
+        });
+        legendEl.innerHTML=groups.length?groups.map(g=>`<span class="legend-item"><i class="legend-line" style="background:${colorFor(g)}"></i>${layoutName(g)}</span>`).join(''):'<span class="tiny">Completa lecturas para visualizar.</span>';
+      }
+      function drawProfile(){
+        const canvas=$('#chartProfile'), {ctx,w,h}=setupCanvas(canvas);ctx.clearRect(0,0,w,h);const row=state.rows[state.selectedRow],m=row?rowMetrics(row):null;const pad={l:44,r:16,t:17,b:42};
+        if(!row||!m||!finite(row.t1)){ctx.fillStyle='#8b98aa';ctx.font='13px Inter,system-ui,sans-serif';ctx.fillText('Selecciona o completa un punto de la tabla.',pad.l,80);return;}
+        const vals=[row.t1,row.t2,row.t3,row.t4], labels=['T1 · h in','T2 · h out','T3 · c in','T4 · c out'];const max=niceMax(Math.max(...vals,1)), pw=w-pad.l-pad.r,ph=h-pad.t-pad.b, bw=Math.min(60,pw/6);
+        for(let i=0;i<=4;i++){const yy=pad.t+ph*i/4;ctx.strokeStyle='#e5eaf2';ctx.beginPath();ctx.moveTo(pad.l,yy);ctx.lineTo(w-pad.r,yy);ctx.stroke();ctx.fillStyle='#8995a8';ctx.font='11px Inter,system-ui,sans-serif';ctx.fillText(fmt(max*(1-i/4),0),5,yy+4)}
+        vals.forEach((v,i)=>{const xx=pad.l+(i+.5)*pw/4-bw/2,hh=v/max*ph, yy=pad.t+ph-hh;ctx.fillStyle=i<2?'#e35b4f':'#2166f3';ctx.fillRect(xx,yy,bw,hh);ctx.fillStyle='#30435f';ctx.textAlign='center';ctx.font='700 11px Inter,system-ui,sans-serif';ctx.fillText(fmt(v,1)+'°',xx+bw/2,yy-7);ctx.fillStyle='#718097';ctx.font='11px Inter,system-ui,sans-serif';ctx.fillText(labels[i],xx+bw/2,h-17)});ctx.textAlign='left';
+      }
+      function updateCharts(){
+        const rows=visibleRows();drawLineChart($('#chartU'),rows,'U',$('#legendU'));drawLineChart($('#chartEta'),rows,'etaM',$('#legendEta'));drawProfile();
+      }
+      function comparisonCard(title,body,tag='lectura'){
+        return `<article class="analysis-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><h3>${title}</h3><span class="status-pill status-neutral">${tag}</span></div><p>${body}</p></article>`;
+      }
+      function valText(v,unit='',d=0){return finite(v)?`<strong>${fmt(v,d)}${unit}</strong>`:'<strong>—</strong>'}
+      function findMetric(layout,qh,qc){
+        const x=state.rows.find(r=>r.layout===layout&&Math.abs(Number(r.qh)-qh)<.001&&Math.abs(Number(r.qc)-qc)<.001);return x?{r:x,m:rowMetrics(x)}:null;
+      }
+      function deltaSentence(a,b,label){
+        if(!a||!b||!a.m.valid||!b.m.valid)return `Completa los dos puntos para comparar ${label}.`;
+        const du=b.m.U-a.m.U,de=b.m.etaM-a.m.etaM;return `Al pasar de <b>${a.r.qh}/${a.r.qc}</b> a <b>${b.r.qh}/${b.r.qc} L/min</b>, U ${du>=0?'aumenta':'disminuye'} ${valText(Math.abs(du),' W/m²K',0)} y ηm ${de>=0?'sube':'baja'} ${valText(Math.abs(de),' puntos porcentuales',1)}.`;
+      }
+      function renderAnalysis(){
+        const cc11=findMetric('counter',1,1),cc21=findMetric('counter',2,1),cc31=findMetric('counter',3,1),cc12=findMetric('counter',1,2),cc13=findMetric('counter',1,3),co21=findMetric('parallel',2,1);
+        let cards=[];
+        cards.push(comparisonCard('Aumentar Fhot',deltaSentence(cc11,cc21,'el efecto del caudal caliente'),'qᵧ ↑')); 
+        cards.push(comparisonCard('Aumentar Fcold',deltaSentence(cc11,cc12,'el efecto del caudal frío'),'q𝚌 ↑'));
+        if(cc21&&co21&&cc21.m.valid&&co21.m.valid){const du=cc21.m.U-co21.m.U,de=cc21.m.etaM-co21.m.etaM;cards.push(comparisonCard('Contraflujo vs. paralelo',`Para 2/1 L/min, la configuración de contraflujo presenta U ${du>=0?'mayor':'menor'} en ${valText(Math.abs(du),' W/m²K',0)} y ηm ${de>=0?'mayor':'menor'} en ${valText(Math.abs(de),' puntos',1)}.`,'arreglo'));}else cards.push(comparisonCard('Contraflujo vs. paralelo','Completa los puntos 2/1 en ambos arreglos para comparar la influencia del sentido de flujo.','arreglo'));
+        const valid=visibleRows().filter(x=>x.m.valid);const best=valid.slice().sort((a,b)=>(b.m.U||-Infinity)-(a.m.U||-Infinity))[0];
+        cards.push(comparisonCard('Mejor U observado',best?`El mayor U del filtro actual aparece en <b>${best.r.label} · ${layoutName(best.r.layout)}</b>: ${valText(best.m.U,' W/m²K',0)}. Comprueba si también mejora ηm; no son el mismo indicador.`:'Completa datos válidos para identificar el mayor U.','evidencia'));
+        const balance=valid.length?valid.reduce((a,x)=>a+Math.abs(x.m.Qf)/Math.max(Math.abs(x.m.Qe),Math.abs(x.m.Qa),1)*100,0)/valid.length:null;
+        cards.push(comparisonCard('Balance de energía',balance!==null?`El desbalance absoluto promedio es ${valText(balance,'% ',1)} de la mayor potencia. Reporta Qf = Qe − Qa y discute pérdidas, sensores, propiedades y estabilidad.`:'Completa Qe y Qa para evaluar el cierre energético.','Qe − Qa'));
+        cards.push(comparisonCard('Cuidado con la LMTD','Si aparece “revisar”, no descartes el dato: verifica el sentido de T1–T4, que T1>T3 y que las diferencias terminales sean positivas para el arreglo elegido.','control de calidad'));
+        $('#analysisCards').innerHTML=cards.join('');
+      }
+      function draftText(){
+        const valid=visibleRows().filter(x=>x.m.valid);if(!valid.length){$('#analysisText').value='Completa al menos un punto válido para generar un borrador.';return;}
+        const bestU=valid.slice().sort((a,b)=>b.m.U-a.m.U)[0], bestE=valid.slice().sort((a,b)=>b.m.etaM-a.m.etaM)[0];
+        const cc=valid.filter(x=>x.r.layout==='counter'), co=valid.filter(x=>x.r.layout==='parallel');
+        const qf=valid.reduce((a,x)=>a+Math.abs(x.m.Qf)/Math.max(Math.abs(x.m.Qe),Math.abs(x.m.Qa),1)*100,0)/valid.length;
+        const text=`En los ${valid.length} puntos válidos analizados, U varió entre ${fmt(Math.min(...valid.map(x=>x.m.U)),0)} y ${fmt(Math.max(...valid.map(x=>x.m.U)),0)} W/m²K. El mayor valor observado correspondió a ${bestU.r.label} L/min en configuración ${layoutName(bestU.r.layout)}. La mayor eficiencia térmica media fue ${fmt(bestE.m.etaM,1)}% en ${bestE.r.label} L/min (${layoutName(bestE.r.layout)}).\n\nAl comparar caudales, se debe interpretar el cambio de U junto con la LMTD y las capacidades caloríficas Ch y Cc; una variación de la temperatura de salida por sí sola no demuestra mejor rendimiento. La diferencia media |Qe−Qa|/max(Qe,Qa) fue aproximadamente ${fmt(qf,1)}%, por lo que conviene discutir pérdidas o ganancias de calor, incertidumbre de medición y estabilidad.\n\nEl contraste entre contraflujo (${cc.length} puntos) y paralelo (${co.length} puntos) debe hacerse con combinaciones equivalentes, especialmente 2/1 L/min, manteniendo las mismas temperaturas de entrada.`;
+        $('#analysisText').value=text;
+        $('#conclusionText').value=`1. El efecto del caudal sobre U debe reportarse con el valor máximo/mínimo y la combinación de operación correspondiente.\n2. La configuración y el balance energético deben discutirse con ηm y Qe−Qa, no solo con una temperatura de salida.\n3. Las diferencias respecto al comportamiento ideal pueden atribuirse a pérdidas al ambiente, propiedades, sensores, caudalímetros o falta de estado estacionario.`;
+        state.analysis=text;state.conclusions=$('#conclusionText').value;
+      }
+      function renderAll(){
+        $('#areaValue').textContent=fmt(AREA,4);
+        $('#simHotIn').value=state.sim.hotIn;$('#simColdIn').value=state.sim.coldIn;$('#simU').value=state.sim.uRef;$('#simExp').value=state.sim.exp;$('#simArrangement').value=state.sim.arrangement;
+        $('#layoutFilter').value=state.layoutFilter;$('#uBasis').value=state.uBasis;
+        syncModeButtons();renderTable();updateCalculatedCells();updateKPIs();updateCharts();renderAnalysis();
+        $('#analysisText').value=state.analysis||$('#analysisText').value;$('#conclusionText').value=state.conclusions||$('#conclusionText').value;
+        $$('[data-check]').forEach(c=>c.checked=!!state.checks[c.dataset.check]);
+      }
+      function syncModeButtons(){
+        $$('.mode-tab').forEach(b=>b.classList.toggle('active',b.dataset.mode===state.mode));
+        $('#modeDescription').textContent=state.mode==='sim'?'Modelo académico idealizado para anticipar tendencias; no son datos medidos.':'Captura de lecturas reales del equipo; los cálculos y gráficos siguen activos.';
+        $('#simControls').style.opacity=state.mode==='lab'?'0.72':'1';
+      }
+      function exportCSV(){
+        const headers=['Caso','Arreglo','Fhot (L/min)','Fcold (L/min)','T1 (°C)','T2 (°C)','T3 (°C)','T4 (°C)','rho_h (kg/m3)','rho_c (kg/m3)','Cp_h (kJ/kgK)','Cp_c (kJ/kgK)','m_h (kg/s)','m_c (kg/s)','Qe (W)','Qa (W)','Qf (W)','LMTD (°C)','U (W/m2K)','eta global (%)','eta h (%)','eta c (%)','eta media (%)','NTU','efectividad (%)','Estado'];
+        const rows=state.rows.map(r=>{const m=rowMetrics(r);return [r.label,layoutName(r.layout),r.qh,r.qc,r.t1,r.t2,r.t3,r.t4,m.ph?.rho,m.pc?.rho,m.ph?.cp,m.pc?.cp,m.mh,m.mc,m.Qe,m.Qa,m.Qf,m.LMTD,m.U,m.Qe?m.Qa/m.Qe*100:null,m.etaH,m.etaC,m.etaM,m.NTU,m.eff,m.message]});
+        const csv=[headers,...rows].map(row=>row.map(v=>{const s=v===null||v===undefined?'':String(v).replace(/"/g,'""');return `"${s}"`;}).join(';')).join('\n');
+        const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}), url=URL.createObjectURL(blob), a=document.createElement('a');a.href=url;a.download='HT33_laboratorio_resultados.csv';a.click();URL.revokeObjectURL(url);
+      }
+      function persist(){
+        state.analysis=$('#analysisText').value;state.conclusions=$('#conclusionText').value;state.checks={};$$('[data-check]').forEach(c=>state.checks[c.dataset.check]=c.checked);
+        localStorage.setItem('ht33-lab-session',JSON.stringify({mode:state.mode,layoutFilter:state.layoutFilter,uBasis:state.uBasis,sim:state.sim,rows:state.rows,checks:state.checks,analysis:state.analysis,conclusions:state.conclusions}));
+        $('#copyStatus').textContent='Sesión guardada en este navegador.';setTimeout(()=>$('#copyStatus').textContent='',2200);
+      }
+      function restore(){
+        try{const saved=JSON.parse(localStorage.getItem('ht33-lab-session')||'null');if(!saved)return false;Object.assign(state,{mode:saved.mode||'sim',layoutFilter:saved.layoutFilter||'all',uBasis:saved.uBasis||'Qe',sim:{...state.sim,...(saved.sim||{})},rows:Array.isArray(saved.rows)?saved.rows:[],checks:saved.checks||{},analysis:saved.analysis||'',conclusions:saved.conclusions||''});if(!state.rows.length)generateRows();else renderAll();return true}catch(e){return false}
+      }
+      function parseCSV(text){
+        const lines=text.replace(/^\uFEFF/,'').split(/\r?\n/).filter(x=>x.trim());if(lines.length<2)return;
+        const sep=lines[0].includes(';')?';':',';const split=line=>line.split(sep).map(s=>s.trim().replace(/^"|"$/g,'').replace(/""/g,'"'));
+        const head=split(lines[0]).map(x=>x.toLowerCase());const idx=(...names)=>{for(const n of names){const i=head.findIndex(h=>h.includes(n));if(i>=0)return i}return -1};
+        const iqh=idx('fhot','qh','caudal caliente'),iqc=idx('fcold','qc','caudal frio','caudal frío'),it1=idx('t1'),it2=idx('t2'),it3=idx('t3'),it4=idx('t4'),il=idx('arreglo','config');
+        if([iqh,iqc,it1,it2,it3,it4].some(i=>i<0)){alert('No se encontraron las columnas mínimas Fhot, Fcold, T1, T2, T3 y T4. Usa el CSV exportado por esta aplicación como plantilla.');return}
+        const parsed=lines.slice(1).map((line,k)=>{const c=split(line), val=i=>{const x=(c[i]||'').replace(',','.');return x===''?null:Number(x)}, layout=(c[il]||'').toLowerCase().includes('coco')||String(c[il]).toLowerCase()==='co'?'parallel':'counter';return {id:uid(),caseId:'import-'+k,label:c[0]||`Importado ${k+1}`,layout,qh:val(iqh),qc:val(iqc),t1:val(it1),t2:val(it2),t3:val(it3),t4:val(it4)}}).filter(r=>finite(r.qh));
+        if(parsed.length){state.rows=parsed;state.mode='lab';state.selectedRow=0;syncModeButtons();renderAll();}
+      }
+      function copySummary(){
+        const valid=visibleRows().filter(x=>x.m.valid);const lines=['HT33 · Resumen de laboratorio','Filtro: '+(state.layoutFilter==='all'?'todas las configuraciones':layoutName(state.layoutFilter)),`Puntos válidos: ${valid.length}`,'','Caso;Arreglo;Fhot;Fcold;U;ηm;Qe;Qa;Qf'];valid.forEach(x=>lines.push([x.r.label,layoutName(x.r.layout),x.r.qh,x.r.qc,finite(x.m.U)?fmt(x.m.U,0):'',finite(x.m.etaM)?fmt(x.m.etaM,1):'',finite(x.m.Qe)?fmt(x.m.Qe/1000):'',finite(x.m.Qa)?fmt(x.m.Qa/1000):'',finite(x.m.Qf/1000)?fmt(x.m.Qf/1000):''].join(';')));lines.push('','ANÁLISIS', $('#analysisText').value,'','CONCLUSIONES',$('#conclusionText').value);const text=lines.join('\n');
+        if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>{$('#copyStatus').textContent='Resumen copiado.';setTimeout(()=>$('#copyStatus').textContent='',2200)}).catch(()=>fallbackCopy(text));}else fallbackCopy(text);
+      }
+      function fallbackCopy(text){const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();$('#copyStatus').textContent='Resumen copiado.';setTimeout(()=>$('#copyStatus').textContent='',2200)}
+
+      // Eventos de controles
+      $$('.mode-tab').forEach(btn=>btn.addEventListener('click',()=>{state.mode=btn.dataset.mode;syncModeButtons();}));
+      $('#btnGenerate').addEventListener('click',()=>{state.sim.hotIn=num($('#simHotIn').value)??60;state.sim.coldIn=num($('#simColdIn').value)??20;state.sim.uRef=num($('#simU').value)??900;state.sim.exp=clamp(num($('#simExp').value)??.25,0,1);state.sim.arrangement=$('#simArrangement').value;state.mode='sim';generateRows();});
+      $('#btnPrepare').addEventListener('click',()=>{state.sim.arrangement=$('#simArrangement').value;blankRows();});
+      $('#layoutFilter').addEventListener('change',e=>{state.layoutFilter=e.target.value;renderAll();});
+      $('#uBasis').addEventListener('change',e=>{state.uBasis=e.target.value;updateCalculatedCells();updateKPIs();updateCharts();renderAnalysis();});
+      $('#dataTable').addEventListener('change',e=>{
+        const t=e.target;if(t.dataset&&t.dataset.field!==undefined){const i=Number(t.dataset.row),field=t.dataset.field;if(state.rows[i]){state.rows[i][field]=field==='layout'?t.value:(t.value===''?null:Number(t.value));if(field==='layout')renderTable();updateCalculatedCells();updateKPIs();updateCharts();renderAnalysis();}}
+        if(t.dataset.remove!==undefined){const i=Number(t.dataset.remove);state.rows.splice(i,1);state.selectedRow=Math.min(state.selectedRow,state.rows.length-1);renderAll();}
+      });
+      $('#dataTable').addEventListener('click',e=>{const b=e.target.closest('[data-remove]');if(b){const i=Number(b.dataset.remove);state.rows.splice(i,1);state.selectedRow=Math.min(state.selectedRow,Math.max(0,state.rows.length-1));renderAll();}});
+      $('#btnAddRow').addEventListener('click',()=>{const c={id:'custom',label:'Nuevo',qh:1,qc:1};state.rows.push(makeRow(c,state.layoutFilter==='parallel'?'parallel':'counter',{}));state.selectedRow=state.rows.length-1;renderAll();});
+      $('#profileRow').addEventListener('change',e=>{state.selectedRow=Number(e.target.value);drawProfile();});
+      $('#btnClearTemps').addEventListener('click',()=>{state.rows.forEach(r=>{r.t1=r.t2=r.t3=r.t4=null});state.mode='lab';syncModeButtons();renderAll();});
+      $('#btnCSV').addEventListener('click',exportCSV);$('#btnPrint').addEventListener('click',()=>window.print());$('#btnSave').addEventListener('click',persist);$('#btnLoad').addEventListener('click',()=>{if(!restore())alert('No hay una sesión guardada en este navegador.');});
+      $('#btnDraft').addEventListener('click',draftText);$('#btnCopy').addEventListener('click',copySummary);
+      $('#btnImport').addEventListener('click',()=>$('#fileImport').click());$('#fileImport').addEventListener('change',e=>{const file=e.target.files[0];if(file){const reader=new FileReader();reader.onload=ev=>parseCSV(ev.target.result);reader.readAsText(file)}e.target.value='';});
+      $$('[data-check]').forEach(c=>c.addEventListener('change',()=>{state.checks[c.dataset.check]=c.checked;}));
+      $('#analysisText').addEventListener('input',e=>state.analysis=e.target.value);$('#conclusionText').addEventListener('input',e=>state.conclusions=e.target.value);
+      window.addEventListener('resize',()=>updateCharts());
+
+      // Arranque: siempre existe una referencia visible en la primera apertura.
+      $('#areaValue').textContent=fmt(AREA,4);generateRows();
+    })();
+  </script>
+</body>
+</html>
+l>
