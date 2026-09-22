@@ -236,13 +236,13 @@
       <div class="card pad" style="margin-top:14px">
         <div class="notice-bar"><span class="status-pill status-neutral">tabla de trabajo</span><span><b>Seis filas</b> permiten trabajar las tres combinaciones definidas para la práctica en contraflujo y paralelo. Para una práctica más corta, filtra una configuración.</span></div>
         <div class="table-tools">
-          <div class="filter-group"><label for="layoutFilter">Mostrar:</label><select id="layoutFilter"><option value="all">Todas las configuraciones</option><option value="counter">Contraflujo</option><option value="parallel">Paralelo</option></select><label for="uBasis" style="margin-left:8px">Q para U:</label><select id="uBasis"><option value="Qe">Qe · emitido por caliente</option><option value="Qa">Qa · absorbido por frío</option><option value="avg">Promedio Qe/Qa</option></select></div>
+          <div class="filter-group"><label for="layoutFilter">Mostrar:</label><select id="layoutFilter"><option value="all">Todas las configuraciones</option><option value="counter">Contraflujo</option><option value="parallel">Paralelo</option></select><label for="uBasis" style="margin-left:8px">Qreal / base para U:</label><select id="uBasis"><option value="Qe">Qe · emitido por caliente</option><option value="Qa">Qa · absorbido por frío</option><option value="avg">Promedio Qe/Qa</option></select></div>
           <div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn small" id="btnAddRow">+ Añadir punto</button><button class="btn small" id="btnImport">Importar CSV</button><button class="btn small" id="btnClearTemps">Borrar temperaturas</button></div>
         </div>
         <div class="table-wrap"><table id="dataTable"><thead><tr>
-          <th># / caso</th><th>arreglo</th><th>Fhot<br>L/min</th><th>Fcold<br>L/min</th><th>T1 entrada h<br>°C</th><th>T2 salida h<br>°C</th><th>T3 entrada c<br>°C</th><th>T4 salida c<br>°C</th><th>estado</th><th>Qe<br>kW</th><th>Qa<br>kW</th><th>LMTD<br>°C</th><th>U<br>W/m²K</th><th>ηm<br>%</th><th></th>
+          <th># / caso</th><th>arreglo</th><th>Fhot<br>L/min</th><th>Fcold<br>L/min</th><th>T1 entrada h<br>°C</th><th>T2 salida h<br>°C</th><th>T3 entrada c<br>°C</th><th>T4 salida c<br>°C</th><th>estado</th><th>Qe<br>kW</th><th>Qa<br>kW</th><th>Qreal<br>kW</th><th>Qmáx<br>kW</th><th>ε<br>%</th><th>LMTD<br>°C</th><th>U<br>W/m²K</th><th>ηm<br>%</th><th></th>
         </tr></thead><tbody></tbody></table></div>
-        <div class="tiny" style="margin-top:10px">Convención: qh y qc son caudales volumétricos; T1/T2 corresponden a entrada/salida caliente y T3/T4 a entrada/salida fría. En paralelo, la LMTD usa las diferencias de temperatura de los dos extremos del mismo lado.</div>
+        <div class="tiny" style="margin-top:10px">Convención: qh y qc son caudales volumétricos; T1/T2 corresponden a entrada/salida caliente y T3/T4 a entrada/salida fría. En paralelo, la LMTD usa las diferencias de temperatura de los dos extremos del mismo lado.</div><div class="callout" style="margin-top:10px"><b>Efectividad:</b> ε = (Qreal / Qmáx) × 100, con <b>Qmáx = Cmínimo × (T1 − T3)</b>. Qreal corresponde a la base seleccionada arriba; por defecto se usa Qe.</div>
       </div>
     </section>
 
@@ -443,18 +443,21 @@
             <td id="status-${i}">${statusHTML(m)}</td>
             <td class="num calc" id="qeh-${i}">${finite(m.Qe)?fmt(m.Qe/1000):'—'}</td>
             <td class="num calc" id="qac-${i}">${finite(m.Qa)?fmt(m.Qa/1000):'—'}</td>
+            <td class="num calc" id="qreal-${i}">${finite(m.Qreal)?fmt(m.Qreal/1000):'—'}</td>
+            <td class="num calc" id="qmax-${i}">${finite(m.Qmax)?fmt(m.Qmax/1000):'—'}</td>
+            <td class="num calc" id="eff-${i}">${finite(m.eff)?fmt(m.eff,1):'—'}</td>
             <td class="num calc" id="lmtd-${i}">${finite(m.LMTD)?fmt(m.LMTD):'—'}</td>
             <td class="num calc" id="u-${i}">${finite(m.U)?fmt(m.U,0):'—'}</td>
             <td class="num calc" id="eta-${i}">${finite(m.etaM)?fmt(m.etaM,1):'—'}</td>
             <td><button class="btn danger small" data-remove="${i}" title="Eliminar fila">×</button></td>
           </tr>`;
-        }).join(''):'<tr><td colspan="15" style="text-align:center;padding:24px;color:#7b899d">No hay filas con este filtro.</td></tr>';
+        }).join(''):'<tr><td colspan="18" style="text-align:center;padding:24px;color:#7b899d">No hay filas con este filtro.</td></tr>';
         updateProfileSelect();
       }
       function updateCalculatedCells(){
         state.rows.forEach((r,i)=>{
           const m=rowMetrics(r);
-          const ids=[['status-'+i,statusHTML(m)],['qeh-'+i,finite(m.Qe)?fmt(m.Qe/1000):'—'],['qac-'+i,finite(m.Qa)?fmt(m.Qa/1000):'—'],['lmtd-'+i,finite(m.LMTD)?fmt(m.LMTD):'—'],['u-'+i,finite(m.U)?fmt(m.U,0):'—'],['eta-'+i,finite(m.etaM)?fmt(m.etaM,1):'—']];
+          const ids=[['status-'+i,statusHTML(m)],['qeh-'+i,finite(m.Qe)?fmt(m.Qe/1000):'—'],['qac-'+i,finite(m.Qa)?fmt(m.Qa/1000):'—'],['qreal-'+i,finite(m.Qreal)?fmt(m.Qreal/1000):'—'],['qmax-'+i,finite(m.Qmax)?fmt(m.Qmax/1000):'—'],['eff-'+i,finite(m.eff)?fmt(m.eff,1):'—'],['lmtd-'+i,finite(m.LMTD)?fmt(m.LMTD):'—'],['u-'+i,finite(m.U)?fmt(m.U,0):'—'],['eta-'+i,finite(m.etaM)?fmt(m.etaM,1):'—']];
           ids.forEach(([id,html])=>{const el=document.getElementById(id);if(el)el.innerHTML=html;});
         });
       }
@@ -556,8 +559,8 @@
         $('#simControls').style.opacity=state.mode==='lab'?'0.72':'1';
       }
       function exportCSV(){
-        const headers=['Caso','Arreglo','Fhot (L/min)','Fcold (L/min)','T1 (°C)','T2 (°C)','T3 (°C)','T4 (°C)','rho_h (kg/m3)','rho_c (kg/m3)','Cp_h (kJ/kgK)','Cp_c (kJ/kgK)','m_h (kg/s)','m_c (kg/s)','Qe (W)','Qa (W)','Qf (W)','LMTD (°C)','U (W/m2K)','eta global (%)','eta h (%)','eta c (%)','eta media (%)','NTU','efectividad (%)','Estado'];
-        const rows=state.rows.map(r=>{const m=rowMetrics(r);return [r.label,layoutName(r.layout),r.qh,r.qc,r.t1,r.t2,r.t3,r.t4,m.ph?.rho,m.pc?.rho,m.ph?.cp,m.pc?.cp,m.mh,m.mc,m.Qe,m.Qa,m.Qf,m.LMTD,m.U,m.Qe?m.Qa/m.Qe*100:null,m.etaH,m.etaC,m.etaM,m.NTU,m.eff,m.message]});
+        const headers=['Caso','Arreglo','Fhot (L/min)','Fcold (L/min)','T1 (°C)','T2 (°C)','T3 (°C)','T4 (°C)','rho_h (kg/m3)','rho_c (kg/m3)','Cp_h (kJ/kgK)','Cp_c (kJ/kgK)','m_h (kg/s)','m_c (kg/s)','Qe (W)','Qa (W)','Qreal (W)','Qmax (W)','Qf (W)','LMTD (°C)','U (W/m2K)','eta global (%)','eta h (%)','eta c (%)','eta media (%)','NTU','efectividad (%)','Estado'];
+        const rows=state.rows.map(r=>{const m=rowMetrics(r);return [r.label,layoutName(r.layout),r.qh,r.qc,r.t1,r.t2,r.t3,r.t4,m.ph?.rho,m.pc?.rho,m.ph?.cp,m.pc?.cp,m.mh,m.mc,m.Qe,m.Qa,m.Qreal,m.Qmax,m.Qf,m.LMTD,m.U,m.Qe?m.Qa/m.Qe*100:null,m.etaH,m.etaC,m.etaM,m.NTU,m.eff,m.message]});
         const csv=[headers,...rows].map(row=>row.map(v=>{const s=v===null||v===undefined?'':String(v).replace(/"/g,'""');return `"${s}"`;}).join(';')).join('\n');
         const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}), url=URL.createObjectURL(blob), a=document.createElement('a');a.href=url;a.download='HT33_laboratorio_resultados.csv';a.click();URL.revokeObjectURL(url);
       }
@@ -579,7 +582,7 @@
         if(parsed.length){state.rows=parsed;state.mode='lab';state.selectedRow=0;syncModeButtons();renderAll();}
       }
       function copySummary(){
-        const valid=visibleRows().filter(x=>x.m.valid);const lines=['HT33 · Resumen de laboratorio','Filtro: '+(state.layoutFilter==='all'?'todas las configuraciones':layoutName(state.layoutFilter)),`Puntos válidos: ${valid.length}`,'','Caso;Arreglo;Fhot;Fcold;U;ηm;Qe;Qa;Qf'];valid.forEach(x=>lines.push([x.r.label,layoutName(x.r.layout),x.r.qh,x.r.qc,finite(x.m.U)?fmt(x.m.U,0):'',finite(x.m.etaM)?fmt(x.m.etaM,1):'',finite(x.m.Qe)?fmt(x.m.Qe/1000):'',finite(x.m.Qa)?fmt(x.m.Qa/1000):'',finite(x.m.Qf/1000)?fmt(x.m.Qf/1000):''].join(';')));lines.push('','ANÁLISIS', $('#analysisText').value,'','CONCLUSIONES',$('#conclusionText').value);const text=lines.join('\n');
+        const valid=visibleRows().filter(x=>x.m.valid);const lines=['HT33 · Resumen de laboratorio','Filtro: '+(state.layoutFilter==='all'?'todas las configuraciones':layoutName(state.layoutFilter)),`Puntos válidos: ${valid.length}`,'','Caso;Arreglo;Fhot;Fcold;U;ηm;Qreal;Qmáx;ε;Qe;Qa;Qf'];valid.forEach(x=>lines.push([x.r.label,layoutName(x.r.layout),x.r.qh,x.r.qc,finite(x.m.U)?fmt(x.m.U,0):'',finite(x.m.etaM)?fmt(x.m.etaM,1):'',finite(x.m.Qreal)?fmt(x.m.Qreal/1000):'',finite(x.m.Qmax)?fmt(x.m.Qmax/1000):'',finite(x.m.eff)?fmt(x.m.eff,1):'',finite(x.m.Qe)?fmt(x.m.Qe/1000):'',finite(x.m.Qa)?fmt(x.m.Qa/1000):'',finite(x.m.Qf/1000)?fmt(x.m.Qf/1000):''].join(';')));lines.push('','ANÁLISIS', $('#analysisText').value,'','CONCLUSIONES',$('#conclusionText').value);const text=lines.join('\n');
         if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>{$('#copyStatus').textContent='Resumen copiado.';setTimeout(()=>$('#copyStatus').textContent='',2200)}).catch(()=>fallbackCopy(text));}else fallbackCopy(text);
       }
       function fallbackCopy(text){const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();$('#copyStatus').textContent='Resumen copiado.';setTimeout(()=>$('#copyStatus').textContent='',2200)}
